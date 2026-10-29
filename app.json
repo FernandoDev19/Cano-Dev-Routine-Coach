@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "devroutine-coach",
+    "name": "DevRoutine Coach",
     "slug": "devroutine-coach",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.devroutine.coach"
     },
     "android": {
       "adaptiveIcon": {
@@ -16,10 +17,36 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.devroutine.coach"
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "scheme": "devroutine",
+    "backgroundColor": "#0f172a",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#22c55e"
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "fd5bdae6-82b5-4fc2-9662-5640a700d521"
+      }
+    },
+    "owner": "fernando_cano"
   }
 }
