@@ -4,8 +4,6 @@ App móvil (Expo + React Native + NativeWind/Tailwind) con un coach de IA que an
 te pregunta **por qué** evitas ciertas tareas, compara lo que haces **en casa vs. en la calle**,
 propone cambios concretos a tu rutina y te recuerda con notificaciones.
 
-Basada en el prototipo `ai_life_routine_coach.html`.
-
 ## Arrancar
 
 ```bash
