@@ -45,7 +45,7 @@ export function SettingsScreen({ onResetAll }: Props) {
   };
 
   const confirmReset = () =>
-    Alert.alert('¿Borrar todos los datos?', 'Se eliminan tareas, historial, check-ins y análisis del coach.', [
+    Alert.alert('¿Borrar todos los datos?', 'Se eliminan tareas, historial, check-ins, diario y análisis del coach.', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Borrar', style: 'destructive', onPress: onResetAll },
     ]);
@@ -141,7 +141,7 @@ export function SettingsScreen({ onResetAll }: Props) {
               </View>
             ) : null}
 
-            <Row label="Check-in de la noche">
+            <Row label="Check-out de la noche">
               <Switch
                 value={prefs.eveningCheckin}
                 onValueChange={(v) => prefs.set({ eveningCheckin: v })}

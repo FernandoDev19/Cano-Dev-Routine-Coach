@@ -52,6 +52,11 @@ export function TaskCard({ task, entry, onDone, onUndo, onSkip, onSetPlace, onEd
           <Text className={`text-sm font-medium ${done ? 'text-slate-400 line-through' : 'text-slate-100'}`}>
             {task.title}
           </Text>
+          {task.date || task.minutes ? (
+            <Text className="mt-0.5 text-[11px] text-slate-500">
+              {[task.date ? 'Solo hoy' : null, task.minutes ? `~${task.minutes} min` : null].filter(Boolean).join(' · ')}
+            </Text>
+          ) : null}
           {skipped ? (
             <Text className="mt-0.5 text-[11px] italic text-amber-400">
               Omitida: {entry?.reason}

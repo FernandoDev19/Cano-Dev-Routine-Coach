@@ -16,6 +16,7 @@ Qué debes hacer:
 Reglas:
 - Usa solo los datos dados; no inventes hechos. Si hay pocos datos, dilo.
 - En "adjustments", "taskId" debe ser uno de los ids de "tasks" (excepto para kind "add").
+- "archived" son tareas que el usuario quitó a propósito y por qué: respétalo, no las vuelvas a proponer ni insistas en algo parecido.
 - Tareas chicas: prefiere versiones de 5–15 minutos antes que agregar carga.
 - No hagas diagnósticos médicos ni psicológicos. Si el texto del usuario sugiere malestar serio o desesperanza, sugiere con calidez hablar con alguien de confianza o un profesional.
 

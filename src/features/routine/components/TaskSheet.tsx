@@ -3,7 +3,7 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { Button, Chip } from '@/shared/ui/primitives';
 import { Sheet } from '@/shared/ui/Sheet';
 import { TimeStepper } from '@/shared/ui/TimeStepper';
-import { CATEGORY_LABEL, PLACE_LABEL } from '../constants';
+import { CATEGORY_LABEL, MINUTE_OPTIONS, PLACE_LABEL, WEEKDAY_OPTIONS } from '../constants';
 import type { Category, NewTask, Place, Task } from '../types';
 
 type Props = {
@@ -23,6 +23,8 @@ export function TaskSheet({ visible, task, onClose, onSave, onArchive }: Props) 
   const [category, setCategory] = useState<Category>('devops');
   const [place, setPlace] = useState<Place>('home');
   const [reminder, setReminder] = useState<string | null>(null);
+  const [days, setDays] = useState<number[]>([]);
+  const [minutes, setMinutes] = useState<number | null>(null);
 
   useEffect(() => {
     if (!visible) return;
@@ -30,7 +32,11 @@ export function TaskSheet({ visible, task, onClose, onSave, onArchive }: Props) 
     setCategory(task?.category ?? 'devops');
     setPlace(task?.place ?? 'home');
     setReminder(task?.reminder ?? null);
+    setDays(task?.days ?? []);
+    setMinutes(task?.minutes ?? null);
   }, [visible, task]);
+
+  const toggleDay = (d: number) => setDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]));
 
   const canSave = title.trim().length > 0;
 
@@ -65,7 +71,27 @@ export function TaskSheet({ visible, task, onClose, onSave, onArchive }: Props) 
         ))}
       </View>
 
-      <Text className="mb-2 text-xs font-medium text-slate-300">Recordatorio diario</Text>
+      <Text className="mb-1 text-xs font-medium text-slate-300">¿Qué días?</Text>
+      <Text className="mb-2 text-[11px] text-slate-500">Sin seleccionar = todos los días.</Text>
+      <View className="mb-4 flex-row gap-2">
+        {WEEKDAY_OPTIONS.map((d) => (
+          <Chip key={d.value} label={d.label} selected={days.includes(d.value)} onPress={() => toggleDay(d.value)} />
+        ))}
+      </View>
+
+      <Text className="mb-2 text-xs font-medium text-slate-300">Duración estimada</Text>
+      <View className="mb-4 flex-row flex-wrap gap-2">
+        {MINUTE_OPTIONS.map((m) => (
+          <Chip
+            key={m}
+            label={`${m} min`}
+            selected={minutes === m}
+            onPress={() => setMinutes(minutes === m ? null : m)}
+          />
+        ))}
+      </View>
+
+      <Text className="mb-2 text-xs font-medium text-slate-300">Recordatorio</Text>
       <View className="mb-6 flex-row items-center justify-between">
         {reminder ? (
           <>
@@ -83,7 +109,18 @@ export function TaskSheet({ visible, task, onClose, onSave, onArchive }: Props) 
         label={task ? 'Guardar cambios' : 'Añadir tarea'}
         icon="checkmark"
         disabled={!canSave}
-        onPress={() => onSave({ title: title.trim(), category, place, reminder })}
+        onPress={() =>
+          onSave({
+            title: title.trim(),
+            category,
+            place,
+            reminder,
+            // Todos los días (o ninguno marcado) se guarda como "sin restricción".
+            days: days.length === 0 || days.length === 7 ? undefined : [...days].sort(),
+            minutes,
+            date: task?.date,
+          })
+        }
       />
       {task && onArchive ? (
         <View className="mt-3">

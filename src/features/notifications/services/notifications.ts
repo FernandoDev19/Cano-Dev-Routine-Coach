@@ -58,10 +58,9 @@ const MORNING_FALLBACKS = [
   'Una cosa pequeña hoy vale más que un plan perfecto mañana.',
 ];
 
-async function scheduleDaily(
-  hhmm: string,
-  content: { title: string; body: string; route: string },
-): Promise<void> {
+type Content = { title: string; body: string; route: string };
+
+async function scheduleDaily(hhmm: string, content: Content): Promise<void> {
   const t = parseHHmm(hhmm);
   if (!t) return;
   await Notifications.scheduleNotificationAsync({
@@ -73,6 +72,24 @@ async function scheduleDaily(
       channelId: CHANNEL_ID,
     },
   });
+}
+
+/** `days` usa Date#getDay (0 = domingo); expo-notifications usa 1 = domingo … 7 = sábado. */
+async function scheduleWeekly(hhmm: string, days: number[], content: Content): Promise<void> {
+  const t = parseHHmm(hhmm);
+  if (!t) return;
+  for (const d of days) {
+    await Notifications.scheduleNotificationAsync({
+      content: { title: content.title, body: content.body, data: { route: content.route } },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+        weekday: d + 1,
+        hour: t.hour,
+        minute: t.minute,
+        channelId: CHANNEL_ID,
+      },
+    });
+  }
 }
 
 /**
@@ -88,24 +105,30 @@ export async function rescheduleAll({ tasks, prefs, nudge }: ScheduleInput): Pro
 
   if (prefs.taskReminders) {
     for (const task of tasks) {
-      if (!task.reminder) continue;
-      await scheduleDaily(task.reminder, {
+      // Las tareas de un solo día (adaptaciones por el objetivo) no se repiten como aviso diario.
+      if (!task.reminder || task.date) continue;
+      const content = {
         title: task.place === 'outside' ? '🌳 Toca salir un rato' : '⏰ Tu mini-rutina',
         body: task.title,
         route: '/',
-      });
+      };
+      if (task.days && task.days.length > 0 && task.days.length < 7) {
+        await scheduleWeekly(task.reminder, task.days, content);
+      } else {
+        await scheduleDaily(task.reminder, content);
+      }
     }
   }
 
   if (prefs.morningNudge) {
     const body = nudge?.trim() || MORNING_FALLBACKS[new Date().getDate() % MORNING_FALLBACKS.length];
-    await scheduleDaily(prefs.morningTime, { title: '☀️ Buenos días, dev', body, route: '/' });
+    await scheduleDaily(prefs.morningTime, { title: '☀️ ¿Cuál es tu objetivo de hoy?', body, route: '/' });
   }
 
   if (prefs.eveningCheckin) {
     await scheduleDaily(prefs.eveningTime, {
-      title: '🌙 ¿Cómo te fue hoy?',
-      body: 'Haz tu check-in de 1 minuto y el coach ajusta tu rutina de mañana.',
+      title: '🌙 Cierra tu día',
+      body: 'Haz tu check-out de 1 minuto: escribo tu diario de hoy y el coach ajusta lo de mañana.',
       route: '/checkin',
     });
   }

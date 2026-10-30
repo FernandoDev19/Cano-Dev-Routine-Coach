@@ -12,7 +12,7 @@ type RoutineState = {
 
   addTask: (input: NewTask) => string;
   updateTask: (id: string, patch: TaskPatch) => void;
-  archiveTask: (id: string) => void;
+  archiveTask: (id: string, reason?: string, note?: string) => void;
 
   markDone: (taskId: string, place: Place, dateKey?: string) => void;
   markSkipped: (taskId: string, reason: string, why?: string, dateKey?: string) => void;
@@ -50,8 +50,19 @@ export const useRoutineStore = create<RoutineState>()(
       updateTask: (id, patch) =>
         set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
 
-      archiveTask: (id) =>
-        set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, archivedAt: Date.now() } : t)) })),
+      archiveTask: (id, reason, note) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  archivedAt: Date.now(),
+                  archiveReason: reason?.trim() || undefined,
+                  archiveNote: note?.trim() || undefined,
+                }
+              : t,
+          ),
+        })),
 
       markDone: (taskId, place, dateKey = toDateKey()) =>
         set((s) => ({

@@ -24,6 +24,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Hoy', tabBarIcon: tabIcon('checkbox-outline', 'checkbox') }} />
+      <Tabs.Screen name="journal" options={{ title: 'Diario', tabBarIcon: tabIcon('book-outline', 'book') }} />
       <Tabs.Screen
         name="coach"
         options={{

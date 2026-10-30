@@ -1,6 +1,6 @@
 import type { Checkin } from '@/features/checkin';
 import type { EntriesByDay, Place, Task } from '@/features/routine';
-import { summarizeDay, type DaySummary } from '@/features/routine';
+import { isScheduledOn, summarizeDay, type DaySummary } from '@/features/routine';
 import { computeStats, type Stats } from '@/features/insights';
 import type { QA } from '../types';
 
@@ -21,6 +21,8 @@ export type CoachInput = {
   noteToday?: string;
   stats: Pick<Stats, 'windowDays' | 'streak' | 'place' | 'tasks' | 'reasons' | 'energy' | 'totalEntries'>;
   answers: { question: string; answer: string }[];
+  /** Tareas que el usuario quitó de su rutina (últimas 8) y por qué: no volver a proponerlas. */
+  archived: { title: string; reason?: string; note?: string }[];
 };
 
 type Source = {
@@ -33,7 +35,7 @@ type Source = {
 
 /** Resume el estado actual en un objeto compacto que consumen el motor local y Gemini. */
 export function buildCoachInput({ tasks, entries, checkins, qa, today }: Source): CoachInput {
-  const active = tasks.filter((t) => !t.archivedAt);
+  const active = tasks.filter((t) => !t.archivedAt && isScheduledOn(t, today));
   const dayEntries = entries[today];
   const stats = computeStats({ tasks, entries, checkins, today, windowDays: 14 });
   const checkin = checkins[today];
@@ -75,5 +77,10 @@ export function buildCoachInput({ tasks, entries, checkins, qa, today }: Source)
       .filter((q) => q.answer)
       .slice(-8)
       .map((q) => ({ question: q.question, answer: q.answer as string })),
+    archived: tasks
+      .filter((t) => t.archivedAt && !t.date)
+      .sort((a, b) => (a.archivedAt ?? 0) - (b.archivedAt ?? 0))
+      .slice(-8)
+      .map((t) => ({ title: t.title, reason: t.archiveReason, note: t.archiveNote })),
   };
 }

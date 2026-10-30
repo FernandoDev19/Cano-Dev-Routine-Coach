@@ -1,4 +1,4 @@
-import { addDays, endOfDayMs } from '@/shared/lib/date';
+import { addDays, endOfDayMs, fromDateKey } from '@/shared/lib/date';
 import type { EntriesByDay, Entry, Task } from '../types';
 
 export type DaySummary = {
@@ -15,10 +15,21 @@ export type DaySummary = {
   homeDone: number;
 };
 
-/** Tareas que existían (y no estaban archivadas) al final de `dateKey`. */
+/** ¿La tarea toca ese día? Respeta tareas de un solo día (`date`) y los días de la semana (`days`). */
+export function isScheduledOn(task: Task, dateKey: string): boolean {
+  if (task.date) return task.date === dateKey;
+  if (task.days && task.days.length > 0 && task.days.length < 7) {
+    return task.days.includes(fromDateKey(dateKey).getDay());
+  }
+  return true;
+}
+
+/** Tareas que existían, no estaban archivadas y tocaban al final de `dateKey`. */
 export function tasksForDay(tasks: Task[], dateKey: string): Task[] {
   const end = endOfDayMs(dateKey);
-  return tasks.filter((t) => t.createdAt <= end && (!t.archivedAt || t.archivedAt > end));
+  return tasks.filter(
+    (t) => t.createdAt <= end && (!t.archivedAt || t.archivedAt > end) && isScheduledOn(t, dateKey),
+  );
 }
 
 export function summarizeDay(

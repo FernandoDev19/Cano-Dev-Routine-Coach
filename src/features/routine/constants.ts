@@ -22,6 +22,28 @@ export const SKIP_REASONS = [
 
 export const OTHER_REASON = 'Otra razón';
 
+/** Motivos para quitar una tarea de la rutina (el coach los usa para no volver a proponerla). */
+export const ARCHIVE_REASONS = [
+  'Ya la domino / ya es un hábito',
+  'Es demasiado grande o complicada',
+  'No me sirve para mi objetivo actual',
+  'Me genera presión o ansiedad',
+  'Ya no tengo tiempo para esto',
+] as const;
+
+/** Orden lunes → domingo; `value` sigue Date#getDay (0 = domingo). */
+export const WEEKDAY_OPTIONS = [
+  { value: 1, label: 'L' },
+  { value: 2, label: 'M' },
+  { value: 3, label: 'X' },
+  { value: 4, label: 'J' },
+  { value: 5, label: 'V' },
+  { value: 6, label: 'S' },
+  { value: 0, label: 'D' },
+] as const;
+
+export const MINUTE_OPTIONS = [5, 10, 15, 30, 45, 60] as const;
+
 export const DEFAULT_TASKS: NewTask[] = [
   { title: 'Práctica Docker/Linux (15 min)', category: 'devops', place: 'home', reminder: '10:00' },
   { title: 'Enviar 1 hoja de vida o contacto', category: 'job', place: 'home', reminder: '11:00' },

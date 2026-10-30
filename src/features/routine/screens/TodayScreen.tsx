@@ -5,10 +5,11 @@ import { Screen } from '@/shared/ui/Screen';
 import { Button, Card, EmptyHint, ProgressBar, SectionTitle } from '@/shared/ui/primitives';
 import { formatLongDate } from '@/shared/lib/date';
 import { useToday } from '@/shared/hooks/useToday';
+import { ArchiveSheet } from '../components/ArchiveSheet';
 import { SkipSheet } from '../components/SkipSheet';
 import { TaskCard } from '../components/TaskCard';
 import { TaskSheet } from '../components/TaskSheet';
-import { useActiveTasks } from '../hooks';
+import { useTodayTasks } from '../hooks';
 import { computeStreak, summarizeDay } from '../lib/progress';
 import { useRoutineStore } from '../store';
 import type { Task } from '../types';
@@ -21,13 +22,14 @@ type Props = {
 
 export function TodayScreen({ onOpenCheckin, banner }: Props) {
   const today = useToday();
-  const tasks = useActiveTasks();
+  const tasks = useTodayTasks(today);
   const entries = useRoutineStore((s) => s.entries);
   const { addTask, updateTask, archiveTask, markDone, markSkipped, clearEntry, setEntryPlace } = useRoutineStore();
 
   const [editing, setEditing] = useState<Task | undefined>();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [skipping, setSkipping] = useState<Task | undefined>();
+  const [archiving, setArchiving] = useState<Task | undefined>();
 
   const todayEntries = entries[today];
   const summary = useMemo(() => summarizeDay(tasks, todayEntries, today), [tasks, todayEntries, today]);
@@ -52,7 +54,7 @@ export function TodayScreen({ onOpenCheckin, banner }: Props) {
           className="flex-row items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2"
         >
           <Ionicons name="moon-outline" size={14} color="#34d399" />
-          <Text className="text-xs font-semibold text-emerald-300">Check-in</Text>
+          <Text className="text-xs font-semibold text-emerald-300">Check-out</Text>
         </Pressable>
       }
     >
@@ -120,11 +122,23 @@ export function TodayScreen({ onOpenCheckin, banner }: Props) {
         onArchive={
           editing
             ? () => {
-                archiveTask(editing.id);
+                const target = editing;
                 setSheetOpen(false);
+                // Espera a que se cierre la primera hoja para abrir la del motivo (evita choque de modales en iOS).
+                setTimeout(() => setArchiving(target), 350);
               }
             : undefined
         }
+      />
+
+      <ArchiveSheet
+        visible={!!archiving}
+        taskTitle={archiving?.title ?? ''}
+        onClose={() => setArchiving(undefined)}
+        onConfirm={(reason, note) => {
+          if (archiving) archiveTask(archiving.id, reason, note);
+          setArchiving(undefined);
+        }}
       />
 
       <SkipSheet

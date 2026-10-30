@@ -6,7 +6,7 @@ const KINDS: AdjustmentKind[] = ['shrink', 'move_outside', 'move_home', 'resched
 const CATEGORIES: Category[] = ['devops', 'job', 'health', 'mindset'];
 const PLACES: Place[] = ['home', 'outside'];
 
-function str(v: unknown, max: number): string | undefined {
+export function str(v: unknown, max: number): string | undefined {
   return typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined;
 }
 
@@ -15,23 +15,16 @@ function strList(v: unknown, maxItems: number, maxLen: number): string[] {
   return v.flatMap((x) => str(x, maxLen) ?? []).slice(0, maxItems);
 }
 
-/**
- * La salida del modelo es input no confiable: validamos forma, ids y horas
- * antes de que algo pueda tocar la rutina del usuario.
- */
-export function sanitizeAnalysis(raw: unknown, tasks: Task[]): AnalysisBody | null {
-  if (typeof raw !== 'object' || raw === null) return null;
-  const r = raw as Record<string, unknown>;
+type AdjustmentList = AnalysisBody['adjustments'];
 
-  const diagnosis = str(r.diagnosis, 600);
-  if (!diagnosis) return null;
-
+/** Valida ajustes propuestos por el modelo (forma, ids, horas) y deja pasar como máximo `max`. */
+export function sanitizeAdjustments(rawList: unknown, tasks: Task[], max = 3): AdjustmentList {
   const valid = new Set(tasks.filter((t) => !t.archivedAt).map((t) => t.id));
-  const adjustments: AnalysisBody['adjustments'] = [];
+  const adjustments: AdjustmentList = [];
 
-  // Se validan todos y recién después se limita a 3: un ítem inválido no debe desplazar a los válidos.
-  for (const item of Array.isArray(r.adjustments) ? r.adjustments : []) {
-    if (adjustments.length >= 3) break;
+  // Se validan todos y recién después se limita: un ítem inválido no debe desplazar a los válidos.
+  for (const item of Array.isArray(rawList) ? rawList : []) {
+    if (adjustments.length >= max) break;
     if (typeof item !== 'object' || item === null) continue;
     const a = item as Record<string, unknown>;
     const kind = KINDS.find((k) => k === a.kind);
@@ -55,12 +48,26 @@ export function sanitizeAnalysis(raw: unknown, tasks: Task[]): AnalysisBody | nu
     adjustments.push({ kind, taskId, newTitle, newReminder, reason });
   }
 
+  return adjustments;
+}
+
+/**
+ * La salida del modelo es input no confiable: validamos forma, ids y horas
+ * antes de que algo pueda tocar la rutina del usuario.
+ */
+export function sanitizeAnalysis(raw: unknown, tasks: Task[]): AnalysisBody | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+  const r = raw as Record<string, unknown>;
+
+  const diagnosis = str(r.diagnosis, 600);
+  if (!diagnosis) return null;
+
   return {
     diagnosis,
     patterns: strList(r.patterns, 3, 240),
     tips: strList(r.tips, 2, 300),
     nudge: str(r.nudge, 120) ?? '',
     questions: strList(r.questions, 2, 240),
-    adjustments,
+    adjustments: sanitizeAdjustments(r.adjustments, tasks, 3),
   };
 }

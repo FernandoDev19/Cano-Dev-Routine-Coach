@@ -9,11 +9,21 @@ export type Task = {
   place: Place;
   /** Recordatorio diario "HH:mm" o null. */
   reminder: string | null;
+  /** Días de la semana en que aplica (0 = domingo … 6 = sábado). Vacío o ausente = todos los días. */
+  days?: number[];
+  /** Duración estimada en minutos (opcional). */
+  minutes?: number | null;
+  /** Si viene, la tarea es solo de ese día ("YYYY-MM-DD"), p. ej. una adaptación por el objetivo del día. */
+  date?: string;
   createdAt: number;
   archivedAt?: number;
+  /** Motivo (chip o texto propio) por el que se quitó de la rutina. */
+  archiveReason?: string;
+  /** Detalle libre opcional de por qué se quitó. */
+  archiveNote?: string;
 };
 
-export type NewTask = Pick<Task, 'title' | 'category' | 'place' | 'reminder'>;
+export type NewTask = Pick<Task, 'title' | 'category' | 'place' | 'reminder' | 'days' | 'minutes' | 'date'>;
 export type TaskPatch = Partial<NewTask>;
 
 export type EntryStatus = 'done' | 'skipped';

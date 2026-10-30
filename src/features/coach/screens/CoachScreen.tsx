@@ -3,17 +3,14 @@ import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/shared/ui/Screen';
 import { Button, Card, EmptyHint, SectionTitle } from '@/shared/ui/primitives';
-import { toDateKey } from '@/shared/lib/date';
 import { useRoutineStore } from '@/features/routine';
-import { useCheckinStore } from '@/features/checkin';
 import { useSettingsStore } from '@/features/settings';
 import { AdjustmentCard } from '../components/AdjustmentCard';
 import { QuestionCard } from '../components/QuestionCard';
 import { useDerivedQuestions } from '../hooks';
-import { buildCoachInput } from '../lib/context';
 import { describeAdjustment } from '../lib/describe';
 import { applyAdjustment } from '../services/adjustments';
-import { runAnalysis } from '../services/analyze';
+import { runCoachNow } from '../services/run';
 import { useCoachStore } from '../store';
 
 type Props = {
@@ -30,7 +27,7 @@ export function CoachScreen({ autoRunKey }: Props) {
   const tasks = useRoutineStore((s) => s.tasks);
   const setEntryWhy = useRoutineStore((s) => s.setEntryWhy);
   const apiKey = useSettingsStore((s) => s.apiKey);
-  const { analysis, qa, setAnalysis, resolveAdjustment, answerQa } = useCoachStore();
+  const { analysis, qa, resolveAdjustment, answerQa } = useCoachStore();
   const derived = useDerivedQuestions();
   const openQa = qa.filter((q) => !q.answer);
 
@@ -39,22 +36,11 @@ export function CoachScreen({ autoRunKey }: Props) {
   const analyze = useCallback(async () => {
     setLoading(true);
     try {
-      // Se lee el estado en el momento de pulsar, no el del último render.
-      const routine = useRoutineStore.getState();
-      const { apiKey: key, model } = useSettingsStore.getState();
-      const input = buildCoachInput({
-        tasks: routine.tasks,
-        entries: routine.entries,
-        checkins: useCheckinStore.getState().checkins,
-        qa: useCoachStore.getState().qa,
-        today: toDateKey(),
-      });
-      const result = await runAnalysis(input, routine.tasks, { apiKey: key, model });
-      setAnalysis(result);
+      await runCoachNow();
     } finally {
       setLoading(false);
     }
-  }, [setAnalysis]);
+  }, []);
 
   const lastRunKey = useRef<string | undefined>(undefined);
   useEffect(() => {

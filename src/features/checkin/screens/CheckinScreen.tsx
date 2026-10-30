@@ -32,7 +32,7 @@ export function CheckinScreen({ onDone }: Props) {
   };
 
   return (
-    <Screen title="Check-in del día" subtitle="Sé sincero, esto es solo entre tú y el coach">
+    <Screen title="Check-out del día" subtitle="Cierra tu día: de aquí sale tu diario y el análisis del coach">
       <Card className="mb-4">
         <SectionTitle icon="battery-half" hint="¿Cómo estuvo tu energía o ánimo hoy?">
           Energía
@@ -74,8 +74,8 @@ export function CheckinScreen({ onDone }: Props) {
       </Card>
 
       <View className="gap-3">
-        <Button label="Guardar y pedir análisis al coach" icon="sparkles" onPress={() => submit(true)} />
-        <Button label="Solo guardar" variant="ghost" onPress={() => submit(false)} />
+        <Button label="Cerrar el día y ver al coach" icon="sparkles" onPress={() => submit(true)} />
+        <Button label="Cerrar el día" variant="ghost" onPress={() => submit(false)} />
       </View>
     </Screen>
   );

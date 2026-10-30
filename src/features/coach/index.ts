@@ -1,4 +1,13 @@
 export { CoachScreen } from './screens/CoachScreen';
 export { useCoachStore } from './store';
 export { usePendingQuestionCount } from './hooks';
+export { AdjustmentCard } from './components/AdjustmentCard';
+export { describeAdjustment } from './lib/describe';
+export { buildCoachInput } from './lib/context';
+export type { CoachInput } from './lib/context';
+export { localAnalysis } from './lib/localCoach';
+export { sanitizeAdjustments, str as cleanString } from './lib/sanitize';
+export { applyToRoutine } from './services/adjustments';
+export { generateJson } from './services/gemini';
+export { runCoachNow } from './services/run';
 export type { Adjustment, Analysis, QA } from './types';
