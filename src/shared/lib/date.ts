@@ -63,3 +63,36 @@ export function shiftHHmm(v: string, deltaMinutes: number): string {
   const total = (((p.hour * 60 + p.minute + deltaMinutes) % 1440) + 1440) % 1440;
   return formatHHmm(Math.floor(total / 60), total % 60);
 }
+
+/** true si es sábado o domingo. */
+export function isWeekend(key: string): boolean {
+  const day = fromDateKey(key).getDay();
+  return day === 0 || day === 6;
+}
+
+/** Lunes de la semana (lun–dom) a la que pertenece `key`. Sirve como clave de semana. */
+export function mondayOf(key: string): string {
+  const day = fromDateKey(key).getDay(); // 0 = domingo
+  return addDays(key, day === 0 ? -6 : 1 - day);
+}
+
+/** Clave de mes "YYYY-MM". */
+export function monthKeyOf(key: string): string {
+  return key.slice(0, 7);
+}
+
+/** Primer día del mes ("YYYY-MM-01") de la fecha dada. */
+export function firstOfMonth(key: string): string {
+  return `${monthKeyOf(key)}-01`;
+}
+
+/** Los 5 días hábiles (lunes a viernes) de la semana de `key`. */
+export function workdaysOfWeek(key: string): string[] {
+  const monday = mondayOf(key);
+  return Array.from({ length: 5 }, (_, i) => addDays(monday, i));
+}
+
+/** Días hábiles que quedan de la semana, contando `key` si es hábil. */
+export function remainingWorkdays(key: string): number {
+  return workdaysOfWeek(key).filter((d) => d >= key).length;
+}

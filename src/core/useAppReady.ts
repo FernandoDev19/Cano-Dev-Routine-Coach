@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useCheckinStore } from '@/features/checkin';
 import { useCoachStore } from '@/features/coach';
+import { useGoalsStore } from '@/features/goals';
 import { useJournalStore } from '@/features/journal';
 import { useNotificationPrefs } from '@/features/notifications';
 import { useRoutineStore } from '@/features/routine';
@@ -11,6 +12,7 @@ const persistedStores = [
   useCheckinStore,
   useCoachStore,
   useJournalStore,
+  useGoalsStore,
   useNotificationPrefs,
   useSettingsStore,
 ];

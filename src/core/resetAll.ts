@@ -1,5 +1,6 @@
 import { useCheckinStore } from '@/features/checkin';
 import { useCoachStore } from '@/features/coach';
+import { useGoalsStore } from '@/features/goals';
 import { useJournalStore } from '@/features/journal';
 import { useRoutineStore } from '@/features/routine';
 
@@ -9,4 +10,5 @@ export function resetAllData(): void {
   useCheckinStore.getState().reset();
   useCoachStore.getState().reset();
   useJournalStore.getState().reset();
+  useGoalsStore.getState().reset();
 }
