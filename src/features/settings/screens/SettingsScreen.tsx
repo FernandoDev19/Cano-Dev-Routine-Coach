@@ -12,7 +12,7 @@ type Props = {
 };
 
 export function SettingsScreen({ onResetAll }: Props) {
-  const { apiKey, model, saveApiKey, clearApiKey, setModel } = useSettingsStore();
+  const { apiKey, model, aiConsent, saveApiKey, clearApiKey, setModel, setAiConsent } = useSettingsStore();
   const prefs = useNotificationPrefs();
 
   const [keyDraft, setKeyDraft] = useState('');
@@ -82,6 +82,17 @@ export function SettingsScreen({ onResetAll }: Props) {
           autoCorrect={false}
           className="mb-4 rounded-xl border border-slate-700 bg-slate-950 p-3 text-sm text-slate-100"
         />
+
+        <Row label="Permitir enviar mis textos a Gemini (peaje diario)">
+          <Switch
+            value={aiConsent === 'granted'}
+            onValueChange={(v) => setAiConsent(v ? 'granted' : 'denied')}
+            trackColor={{ true: '#16a34a' }}
+          />
+        </Row>
+        <Text className="mb-4 text-[11px] text-slate-500">
+          Si lo desactivas, el peaje se arma en tu teléfono con reglas locales y no sale nada a internet.
+        </Text>
 
         <View className="flex-row gap-3">
           <View className="flex-1">

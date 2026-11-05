@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { zustandStorage } from '@/shared/lib/storage';
+import type { AiConsent } from './lib/consent';
 
 const KEY_NAME = 'gemini_api_key';
 export const DEFAULT_MODEL = 'gemini-3-flash-preview';
@@ -28,10 +29,13 @@ async function writeKey(value: string): Promise<void> {
 
 type SettingsState = {
   model: string;
+  /** Persistido. Nada sale hacia Gemini mientras no sea `granted`. */
+  aiConsent: AiConsent;
   /** Solo en memoria: la clave vive en SecureStore, nunca en AsyncStorage. */
   apiKey: string;
   keyLoaded: boolean;
   setModel: (model: string) => void;
+  setAiConsent: (consent: AiConsent) => void;
   loadApiKey: () => Promise<void>;
   saveApiKey: (key: string) => Promise<void>;
   clearApiKey: () => Promise<void>;
@@ -41,9 +45,11 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       model: DEFAULT_MODEL,
+      aiConsent: 'unknown',
       apiKey: '',
       keyLoaded: false,
       setModel: (model) => set({ model: model.trim() || DEFAULT_MODEL }),
+      setAiConsent: (aiConsent) => set({ aiConsent }),
       loadApiKey: async () => {
         const key = await readKey();
         set({ apiKey: key, keyLoaded: true });
@@ -61,7 +67,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'settings-v1',
       storage: zustandStorage,
-      partialize: (s) => ({ model: s.model }),
+      partialize: (s) => ({ model: s.model, aiConsent: s.aiConsent }),
     },
   ),
 );

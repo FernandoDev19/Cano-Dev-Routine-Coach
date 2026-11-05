@@ -29,13 +29,37 @@ export type DayToll = {
   /** Tarea concreta resultante. */
   toll: string;
   level: TollLevel;
+  /**
+   * Comparación invisible con la meta semanal: `true` si el borrador es un paso lógico hacia ella,
+   * `false` si no, `null` si no hay meta semanal o no se pudo saber. Nunca se muestra al usuario.
+   */
+  aligned: boolean | null;
   source: 'gemini' | 'local';
   status: TollStatus;
   createdAt: number;
   paidAt?: number;
 };
 
-export type NewDayToll = Pick<DayToll, 'dateKey' | 'draft' | 'toll' | 'level' | 'source'>;
+export type NewDayToll = Pick<DayToll, 'dateKey' | 'draft' | 'toll' | 'level' | 'aligned' | 'source'>;
+
+/** Lo que el analista recibe: el borrador y, solo como contexto interno, la meta de la semana. */
+export type TollInput = {
+  draft: string;
+  weekGoal?: string;
+};
+
+/** Resultado del analista, venga de Gemini o del motor local. */
+export type TollBody = {
+  toll: string;
+  level: TollLevel;
+  aligned: boolean | null;
+};
+
+export type TollResult = TollBody & {
+  source: DayToll['source'];
+  /** Si Gemini falló y se usó el motor local, el motivo. */
+  fallbackNote?: string;
+};
 
 /** Qué pantalla corresponde hoy. Fin de semana = descanso sagrado. */
 export type DayMode = 'daily' | 'rest';
