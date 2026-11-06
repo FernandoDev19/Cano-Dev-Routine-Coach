@@ -10,7 +10,10 @@ type GoalsState = {
   months: Record<string, MonthGoal>;
   weeks: Record<string, WeekGoal>;
   tolls: Record<string, DayToll>;
+  /** Solo en memoria: hay un peaje armándose (evita envíos dobles). */
+  generating: boolean;
 
+  setGenerating: (v: boolean) => void;
   /** Guarda (o reemplaza) la meta del mes de `dateKey`. */
   setMonthGoal: (text: string, dateKey?: string) => void;
   /** Guarda (o reemplaza) la meta de la semana de `dateKey`. */
@@ -36,6 +39,9 @@ export const useGoalsStore = create<GoalsState>()(
       months: {},
       weeks: {},
       tolls: {},
+      generating: false,
+
+      setGenerating: (generating) => set({ generating }),
 
       setMonthGoal: (text, dateKey = toDateKey()) =>
         set((s) => {
@@ -65,6 +71,8 @@ export const useGoalsStore = create<GoalsState>()(
         set((s) => {
           const toll = input.toll.trim();
           if (!toll) return s;
+          // Un peaje ya pagado no se reabre ni se reemplaza.
+          if (s.tolls[input.dateKey]?.status === 'paid') return s;
           const next: DayToll = {
             ...input,
             draft: input.draft.trim(),
@@ -89,7 +97,7 @@ export const useGoalsStore = create<GoalsState>()(
           return { tolls: rest };
         }),
 
-      reset: () => set({ months: {}, weeks: {}, tolls: {} }),
+      reset: () => set({ months: {}, weeks: {}, tolls: {}, generating: false }),
     }),
     {
       name: 'goals-v1',

@@ -16,11 +16,13 @@ import type { Task } from '../types';
 
 type Props = {
   onOpenCheckin: () => void;
+  /** Lo primero que se ve al abrir Hoy (p. ej. el peaje diario). Lo inyecta la capa de app. */
+  top?: ReactNode;
   /** Contenido extra (p. ej. aviso de preguntas del coach) que inyecta la capa de app. */
   banner?: ReactNode;
 };
 
-export function TodayScreen({ onOpenCheckin, banner }: Props) {
+export function TodayScreen({ onOpenCheckin, top, banner }: Props) {
   const today = useToday();
   const tasks = useTodayTasks(today);
   const entries = useRoutineStore((s) => s.entries);
@@ -58,6 +60,8 @@ export function TodayScreen({ onOpenCheckin, banner }: Props) {
         </Pressable>
       }
     >
+      {top}
+
       <View className="mb-4 flex-row gap-3">
         <Card className="flex-1">
           <Text className="text-[11px] font-medium text-slate-400">Momentum</Text>

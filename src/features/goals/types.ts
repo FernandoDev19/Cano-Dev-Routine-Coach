@@ -35,12 +35,17 @@ export type DayToll = {
    */
   aligned: boolean | null;
   source: 'gemini' | 'local';
+  /** Si Gemini falló y se usó el motor local, el motivo (se muestra en discreto). */
+  fallbackNote?: string;
   status: TollStatus;
   createdAt: number;
   paidAt?: number;
 };
 
-export type NewDayToll = Pick<DayToll, 'dateKey' | 'draft' | 'toll' | 'level' | 'aligned' | 'source'>;
+export type NewDayToll = Pick<
+  DayToll,
+  'dateKey' | 'draft' | 'toll' | 'level' | 'aligned' | 'source' | 'fallbackNote'
+>;
 
 /** Lo que el analista recibe: el borrador y, solo como contexto interno, la meta de la semana. */
 export type TollInput = {
