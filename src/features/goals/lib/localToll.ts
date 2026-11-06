@@ -62,14 +62,14 @@ function words(text: string): Set<string> {
   );
 }
 
-/** Alineación aproximada: comparten tema o alguna palabra significativa. null si no hay meta semanal. */
-function alignment(draft: string, weekGoal?: string): boolean | null {
-  if (!weekGoal) return null;
+/** Alineación aproximada: comparten tema o alguna palabra significativa. null si no hay meta de referencia. */
+export function goalAlignment(draft: string, reference?: string): boolean | null {
+  if (!reference) return null;
   const dt = detectTopic(draft);
-  const wt = detectTopic(weekGoal);
+  const wt = detectTopic(reference);
   if (dt !== 'generic' && dt === wt) return true;
   const a = words(draft);
-  for (const w of words(weekGoal)) if (a.has(w)) return true;
+  for (const w of words(reference)) if (a.has(w)) return true;
   // Un borrador sin tema claro no se puede juzgar; uno con otro tema sí es otra cosa.
   return dt === 'generic' ? null : false;
 }
@@ -85,7 +85,7 @@ export function isLowState(text: string): boolean {
  */
 export function localToll({ draft, weekGoal }: TollInput): TollBody {
   const clean = draft.trim();
-  const aligned = alignment(clean, weekGoal);
+  const aligned = goalAlignment(clean, weekGoal);
   const topic = detectTopic(clean, weekGoal);
 
   if (isLowState(clean)) {

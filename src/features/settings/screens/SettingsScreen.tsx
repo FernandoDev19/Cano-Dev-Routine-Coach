@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Alert, Linking, Switch, Text, TextInput, View } from 'react-native';
 import { Screen } from '@/shared/ui/Screen';
 import { Button, Card, SectionTitle } from '@/shared/ui/primitives';
@@ -9,9 +10,11 @@ import { DEFAULT_MODEL, useSettingsStore } from '../store';
 type Props = {
   /** Lo inyecta la capa de app: borra los datos de todas las features. */
   onResetAll: () => void;
+  /** Contenido extra al inicio (p. ej. las metas), que inyecta la capa de app. */
+  extra?: ReactNode;
 };
 
-export function SettingsScreen({ onResetAll }: Props) {
+export function SettingsScreen({ onResetAll, extra }: Props) {
   const { apiKey, model, aiConsent, saveApiKey, clearApiKey, setModel, setAiConsent } = useSettingsStore();
   const prefs = useNotificationPrefs();
 
@@ -52,6 +55,8 @@ export function SettingsScreen({ onResetAll }: Props) {
 
   return (
     <Screen title="Ajustes">
+      {extra}
+
       <Card className="mb-4">
         <SectionTitle icon="sparkles" hint="Sin API key el coach usa un motor de reglas local, sin internet.">
           Coach con Gemini

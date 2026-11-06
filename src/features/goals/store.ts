@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { mondayOf, monthKeyOf, toDateKey } from '@/shared/lib/date';
 import { zustandStorage } from '@/shared/lib/storage';
-import type { DayToll, MonthGoal, NewDayToll, WeekGoal } from './types';
+import type { DayToll, GoalKind, MonthGoal, NewDayToll, WeekGoal } from './types';
 
 const MAX_TOLLS = 120;
 
@@ -10,10 +10,14 @@ type GoalsState = {
   months: Record<string, MonthGoal>;
   weeks: Record<string, WeekGoal>;
   tolls: Record<string, DayToll>;
+  /** Último mes ("YYYY-MM") y semana (lunes) en que la hoja de metas se abrió sola: una vez por período. */
+  lastPromptedMonth: string | null;
+  lastPromptedWeek: string | null;
   /** Solo en memoria: hay un peaje armándose (evita envíos dobles). */
   generating: boolean;
 
   setGenerating: (v: boolean) => void;
+  markPrompted: (kind: GoalKind, periodKey: string) => void;
   /** Guarda (o reemplaza) la meta del mes de `dateKey`. */
   setMonthGoal: (text: string, dateKey?: string) => void;
   /** Guarda (o reemplaza) la meta de la semana de `dateKey`. */
@@ -39,9 +43,13 @@ export const useGoalsStore = create<GoalsState>()(
       months: {},
       weeks: {},
       tolls: {},
+      lastPromptedMonth: null,
+      lastPromptedWeek: null,
       generating: false,
 
       setGenerating: (generating) => set({ generating }),
+      markPrompted: (kind, periodKey) =>
+        set(kind === 'month' ? { lastPromptedMonth: periodKey } : { lastPromptedWeek: periodKey }),
 
       setMonthGoal: (text, dateKey = toDateKey()) =>
         set((s) => {
@@ -97,12 +105,19 @@ export const useGoalsStore = create<GoalsState>()(
           return { tolls: rest };
         }),
 
-      reset: () => set({ months: {}, weeks: {}, tolls: {}, generating: false }),
+      reset: () =>
+        set({ months: {}, weeks: {}, tolls: {}, lastPromptedMonth: null, lastPromptedWeek: null, generating: false }),
     }),
     {
       name: 'goals-v1',
       storage: zustandStorage,
-      partialize: (s) => ({ months: s.months, weeks: s.weeks, tolls: s.tolls }),
+      partialize: (s) => ({
+        months: s.months,
+        weeks: s.weeks,
+        tolls: s.tolls,
+        lastPromptedMonth: s.lastPromptedMonth,
+        lastPromptedWeek: s.lastPromptedWeek,
+      }),
     },
   ),
 );

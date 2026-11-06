@@ -76,3 +76,32 @@ export type DayContext = {
   mode: DayMode;
   setup: SetupStep;
 };
+
+export type GoalKind = 'month' | 'week';
+
+/**
+ * - `ok`: viable tal cual.
+ * - `reduced`: se hizo medible o se redujo; `text` trae la propuesta.
+ * - `unclear`: no se puede proponer solo; `note` dice qué falta. El usuario siempre puede guardar la suya.
+ */
+export type ReviewVerdict = 'ok' | 'reduced' | 'unclear';
+
+export type GoalReviewInput = {
+  kind: GoalKind;
+  text: string;
+  /** Meta del mes: contexto para validar que la de la semana sea un paso lógico. */
+  monthGoal?: string;
+};
+
+export type GoalReviewBody = {
+  verdict: ReviewVerdict;
+  /** Texto propuesto (igual al original si el veredicto no es `reduced`). */
+  text: string;
+  /** Una frase corta con el porqué. */
+  note: string;
+};
+
+export type GoalReviewResult = GoalReviewBody & {
+  source: 'gemini' | 'local';
+  fallbackNote?: string;
+};
