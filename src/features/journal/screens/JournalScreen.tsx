@@ -7,6 +7,7 @@ import { Button, Card, EmptyHint } from '@/shared/ui/primitives';
 import { formatLongDate } from '@/shared/lib/date';
 import { useToday } from '@/shared/hooks/useToday';
 import { useCheckinStore } from '@/features/checkin';
+import { useConsentGate } from '@/features/settings';
 import { useJournalStore } from '../store';
 
 type Props = {
@@ -24,6 +25,7 @@ export function JournalScreen({ onGenerateToday, onOpenCheckout }: Props) {
   const writing = useJournalStore((s) => s.writing);
   const editDiary = useJournalStore((s) => s.editDiary);
   const checkedOutToday = useCheckinStore((s) => !!s.checkins[today]);
+  const { gate, sheet: consentSheet } = useConsentGate();
 
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -41,7 +43,7 @@ export function JournalScreen({ onGenerateToday, onOpenCheckout }: Props) {
   };
 
   const regenerate = () => {
-    const run = () => onGenerateToday();
+    const run = () => gate(onGenerateToday);
     if (diary[today]?.edited) {
       Alert.alert('¿Reescribir tu diario de hoy?', 'Perderás los cambios que hiciste a mano.', [
         { text: 'Cancelar', style: 'cancel' },
@@ -152,6 +154,7 @@ export function JournalScreen({ onGenerateToday, onOpenCheckout }: Props) {
           }}
         />
       </Sheet>
+      {consentSheet}
     </Screen>
   );
 }

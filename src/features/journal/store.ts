@@ -1,29 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { zustandStorage } from '@/shared/lib/storage';
-import type { DayGoal, DiaryEntry, GoalPlan } from './types';
-
-type AdjustmentStatus = 'pending' | 'applied' | 'dismissed';
+import type { DayGoal, DiaryEntry } from './types';
 
 type JournalState = {
   goals: Record<string, DayGoal>;
   diary: Record<string, DiaryEntry>;
-  /** Último día en que se abrió solo la hoja "objetivo de hoy" (una vez por día). */
-  lastGoalPromptDate: string | null;
   /** Solo en memoria. */
-  planning: boolean;
   writing: boolean;
 
   setGoal: (dateKey: string, text: string) => void;
-  markGoalPrompted: (dateKey: string) => void;
   setGoalAchieved: (dateKey: string, achieved: boolean) => void;
-  setGoalPlan: (dateKey: string, plan: GoalPlan) => void;
-  resolveGoalAdjustment: (dateKey: string, adjustmentId: string, status: AdjustmentStatus) => void;
 
   setDiaryGenerated: (dateKey: string, text: string, source: 'gemini' | 'local') => void;
   editDiary: (dateKey: string, text: string) => void;
 
-  setPlanning: (v: boolean) => void;
   setWriting: (v: boolean) => void;
   reset: () => void;
 };
@@ -33,8 +24,6 @@ export const useJournalStore = create<JournalState>()(
     (set) => ({
       goals: {},
       diary: {},
-      lastGoalPromptDate: null,
-      planning: false,
       writing: false,
 
       setGoal: (dateKey, text) =>
@@ -42,7 +31,6 @@ export const useJournalStore = create<JournalState>()(
           const prev = s.goals[dateKey];
           const clean = text.trim();
           if (!clean) return s;
-          const same = prev?.text === clean;
           return {
             goals: {
               ...s.goals,
@@ -50,31 +38,13 @@ export const useJournalStore = create<JournalState>()(
                 text: clean,
                 achieved: prev?.achieved ?? false,
                 at: prev?.at ?? Date.now(),
-                // Si el objetivo cambió, el plan anterior ya no aplica.
-                plan: same ? prev?.plan : undefined,
               },
             },
           };
         }),
 
-      markGoalPrompted: (dateKey) => set({ lastGoalPromptDate: dateKey }),
-
       setGoalAchieved: (dateKey, achieved) =>
         set((s) => (s.goals[dateKey] ? { goals: { ...s.goals, [dateKey]: { ...s.goals[dateKey], achieved } } } : s)),
-
-      setGoalPlan: (dateKey, plan) =>
-        set((s) => (s.goals[dateKey] ? { goals: { ...s.goals, [dateKey]: { ...s.goals[dateKey], plan } } } : s)),
-
-      resolveGoalAdjustment: (dateKey, adjustmentId, status) =>
-        set((s) => {
-          const goal = s.goals[dateKey];
-          if (!goal?.plan) return s;
-          const plan = {
-            ...goal.plan,
-            adjustments: goal.plan.adjustments.map((a) => (a.id === adjustmentId ? { ...a, status } : a)),
-          };
-          return { goals: { ...s.goals, [dateKey]: { ...goal, plan } } };
-        }),
 
       setDiaryGenerated: (dateKey, text, source) =>
         set((s) => {
@@ -107,14 +77,13 @@ export const useJournalStore = create<JournalState>()(
           };
         }),
 
-      setPlanning: (planning) => set({ planning }),
       setWriting: (writing) => set({ writing }),
-      reset: () => set({ goals: {}, diary: {}, lastGoalPromptDate: null, planning: false, writing: false }),
+      reset: () => set({ goals: {}, diary: {}, writing: false }),
     }),
     {
       name: 'journal-v1',
       storage: zustandStorage,
-      partialize: (s) => ({ goals: s.goals, diary: s.diary, lastGoalPromptDate: s.lastGoalPromptDate }),
+      partialize: (s) => ({ goals: s.goals, diary: s.diary }),
     },
   ),
 );

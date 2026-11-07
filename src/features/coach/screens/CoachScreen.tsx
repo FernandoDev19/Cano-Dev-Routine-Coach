@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/shared/ui/Screen';
 import { Button, Card, EmptyHint, SectionTitle } from '@/shared/ui/primitives';
 import { useRoutineStore } from '@/features/routine';
-import { useSettingsStore } from '@/features/settings';
+import { remoteAllowed, useConsentGate, useSettingsStore } from '@/features/settings';
 import { AdjustmentCard } from '../components/AdjustmentCard';
 import { QuestionCard } from '../components/QuestionCard';
 import { useDerivedQuestions } from '../hooks';
@@ -27,6 +27,8 @@ export function CoachScreen({ autoRunKey }: Props) {
   const tasks = useRoutineStore((s) => s.tasks);
   const setEntryWhy = useRoutineStore((s) => s.setEntryWhy);
   const apiKey = useSettingsStore((s) => s.apiKey);
+  const aiConsent = useSettingsStore((s) => s.aiConsent);
+  const { gate, sheet: consentSheet } = useConsentGate();
   const { analysis, qa, resolveAdjustment, answerQa } = useCoachStore();
   const derived = useDerivedQuestions();
   const openQa = qa.filter((q) => !q.answer);
@@ -56,10 +58,14 @@ export function CoachScreen({ autoRunKey }: Props) {
     <Screen
       title="Coach"
       subtitle="Analiza tus patrones y ajusta tu rutina"
-      right={<Button label="Analizar" icon="sparkles" small loading={loading} onPress={analyze} />}
+      right={<Button label="Analizar" icon="sparkles" small loading={loading} onPress={() => gate(analyze)} />}
     >
       <Text className="-mt-2 mb-4 text-[11px] text-slate-500">
-        {apiKey ? 'Motor: Gemini (con respaldo local si falla)' : 'Motor: reglas locales · agrega tu API key en Ajustes para usar Gemini'}
+        {remoteAllowed(apiKey, aiConsent)
+          ? 'Motor: Gemini (con respaldo local si falla)'
+          : apiKey
+            ? 'Motor: reglas locales · permite Gemini en Ajustes para usarlo'
+            : 'Motor: reglas locales · agrega tu API key en Ajustes para usar Gemini'}
       </Text>
 
       {analysis?.fallbackNote ? (
@@ -149,6 +155,7 @@ export function CoachScreen({ autoRunKey }: Props) {
           </View>
         </Card>
       ) : null}
+      {consentSheet}
     </Screen>
   );
 }

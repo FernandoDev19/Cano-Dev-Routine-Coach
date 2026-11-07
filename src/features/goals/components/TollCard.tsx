@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Card, SectionTitle } from '@/shared/ui/primitives';
+import { ConsentSheet } from '@/features/settings';
+import { tollStreak } from '../lib/streak';
 import { useGoalsStore } from '../store';
-import { ConsentSheet } from './ConsentSheet';
 
 type Props = {
   dateKey: string;
@@ -15,10 +16,23 @@ type Props = {
   onPay: () => void;
 };
 
+function StreakBadge({ days }: { days: number }) {
+  if (days <= 0) return null;
+  return (
+    <View className="mb-2 flex-row items-center gap-1.5">
+      <Ionicons name="flame" size={16} color="#f59e0b" />
+      <Text className="text-xs font-semibold text-amber-300">
+        {days} {days === 1 ? 'día hábil seguido' : 'días hábiles seguidos'}
+      </Text>
+    </View>
+  );
+}
+
 /** El peaje del día: borrador → "Mínimo Ridículo" → pagado. No muestra la meta del mes ni de la semana. */
 export function TollCard({ dateKey, askConsent, onConsent, onSubmit, onPay }: Props) {
   const toll = useGoalsStore((s) => s.tolls[dateKey]);
   const generating = useGoalsStore((s) => s.generating);
+  const streak = useGoalsStore((s) => tollStreak(s.tolls, dateKey));
 
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -62,6 +76,9 @@ export function TollCard({ dateKey, askConsent, onConsent, onSubmit, onPay }: Pr
           <Ionicons name="checkmark-circle" size={22} color="#34d399" />
           <Text className="text-base font-bold text-emerald-300">Peaje pagado</Text>
         </View>
+        <View className="mt-1">
+          <StreakBadge days={streak} />
+        </View>
         <Text className="mt-2 text-sm leading-5 text-slate-300 line-through">{toll.toll}</Text>
         <Text className="mt-3 text-sm leading-5 text-slate-100">
           Ya cumpliste. El resto del día es tiempo muerto, libre de culpa: juega, descansa, desconéctate.
@@ -74,6 +91,7 @@ export function TollCard({ dateKey, askConsent, onConsent, onSubmit, onPay }: Pr
     const biological = toll.level === 'biological';
     return (
       <Card className={`mb-4 ${biological ? 'border-amber-500/30' : 'border-emerald-500/30'}`}>
+        <StreakBadge days={streak} />
         <SectionTitle
           icon={biological ? 'heart' : 'flag'}
           hint={biological ? 'Hoy basta con esto para no romper la racha.' : 'Menos de 15 minutos. Solo esto.'}
@@ -102,6 +120,7 @@ export function TollCard({ dateKey, askConsent, onConsent, onSubmit, onPay }: Pr
 
   return (
     <Card className="mb-4 border-emerald-500/30">
+      <StreakBadge days={streak} />
       <SectionTitle icon="flag" hint="Escríbelo como te salga. Yo lo convierto en algo que puedas hacer ya.">
         ¿Qué quieres lograr hoy?
       </SectionTitle>

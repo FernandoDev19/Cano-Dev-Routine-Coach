@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, TextInput, View } from 'react-native';
 import { Sheet } from '@/shared/ui/Sheet';
 import { Button } from '@/shared/ui/primitives';
+import { ConsentBody } from '@/features/settings';
 import type { GoalKind, GoalReviewResult } from '../types';
-import { ConsentBody } from './ConsentBody';
 
 type Stage = 'write' | 'consent' | 'reviewing' | 'result';
 

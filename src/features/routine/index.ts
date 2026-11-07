@@ -1,4 +1,4 @@
-export { TodayScreen } from './screens/TodayScreen';
+export { RoutineScreen } from './screens/RoutineScreen';
 export { useRoutineStore } from './store';
 export { useActiveTasks, useTodayTasks } from './hooks';
 export { computeStreak, isScheduledOn, summarizeDay, tasksForDay } from './lib/progress';

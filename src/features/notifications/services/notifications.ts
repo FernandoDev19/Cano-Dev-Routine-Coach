@@ -58,6 +58,9 @@ const MORNING_FALLBACKS = [
   'Una cosa pequeña hoy vale más que un plan perfecto mañana.',
 ];
 
+/** Lunes a viernes (Date#getDay). Sábado y domingo son de descanso: sin avisos de trabajo. */
+export const WEEKDAYS = [1, 2, 3, 4, 5];
+
 type Content = { title: string; body: string; route: string };
 
 async function scheduleDaily(hhmm: string, content: Content): Promise<void> {
@@ -110,7 +113,7 @@ export async function rescheduleAll({ tasks, prefs, nudge }: ScheduleInput): Pro
       const content = {
         title: task.place === 'outside' ? '🌳 Toca salir un rato' : '⏰ Tu mini-rutina',
         body: task.title,
-        route: '/',
+        route: '/routine',
       };
       if (task.days && task.days.length > 0 && task.days.length < 7) {
         await scheduleWeekly(task.reminder, task.days, content);
@@ -122,7 +125,7 @@ export async function rescheduleAll({ tasks, prefs, nudge }: ScheduleInput): Pro
 
   if (prefs.morningNudge) {
     const body = nudge?.trim() || MORNING_FALLBACKS[new Date().getDate() % MORNING_FALLBACKS.length];
-    await scheduleDaily(prefs.morningTime, { title: '☀️ ¿Cuál es tu objetivo de hoy?', body, route: '/' });
+    await scheduleWeekly(prefs.morningTime, WEEKDAYS, { title: '☀️ Tu peaje de hoy', body, route: '/' });
   }
 
   if (prefs.eveningCheckin) {

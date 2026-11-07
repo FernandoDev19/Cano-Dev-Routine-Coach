@@ -35,6 +35,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="routine"
+        options={{ title: 'Rutina', tabBarIcon: tabIcon('list-outline', 'list') }}
+      />
+      <Tabs.Screen
         name="progress"
         options={{ title: 'Progreso', tabBarIcon: tabIcon('stats-chart-outline', 'stats-chart') }}
       />

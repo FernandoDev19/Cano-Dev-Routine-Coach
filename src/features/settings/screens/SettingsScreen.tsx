@@ -144,7 +144,7 @@ export function SettingsScreen({ onResetAll, extra }: Props) {
               />
             </Row>
 
-            <Row label="Empujón de la mañana">
+            <Row label="Aviso de la mañana (lun–vie)">
               <Switch
                 value={prefs.morningNudge}
                 onValueChange={(v) => prefs.set({ morningNudge: v })}

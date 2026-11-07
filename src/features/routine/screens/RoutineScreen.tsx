@@ -1,9 +1,8 @@
-import { useMemo, useState, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/shared/ui/Screen';
 import { Button, Card, EmptyHint, ProgressBar, SectionTitle } from '@/shared/ui/primitives';
-import { formatLongDate } from '@/shared/lib/date';
 import { useToday } from '@/shared/hooks/useToday';
 import { ArchiveSheet } from '../components/ArchiveSheet';
 import { SkipSheet } from '../components/SkipSheet';
@@ -14,15 +13,8 @@ import { computeStreak, summarizeDay } from '../lib/progress';
 import { useRoutineStore } from '../store';
 import type { Task } from '../types';
 
-type Props = {
-  onOpenCheckin: () => void;
-  /** Lo primero que se ve al abrir Hoy (p. ej. el peaje diario). Lo inyecta la capa de app. */
-  top?: ReactNode;
-  /** Contenido extra (p. ej. aviso de preguntas del coach) que inyecta la capa de app. */
-  banner?: ReactNode;
-};
-
-export function TodayScreen({ onOpenCheckin, top, banner }: Props) {
+/** Mini-rutina de apoyo: hábitos opcionales que acompañan al peaje diario, sin protagonismo. */
+export function RoutineScreen() {
   const today = useToday();
   const tasks = useTodayTasks(today);
   const entries = useRoutineStore((s) => s.entries);
@@ -47,21 +39,7 @@ export function TodayScreen({ onOpenCheckin, top, banner }: Props) {
   };
 
   return (
-    <Screen
-      title="Hoy"
-      subtitle={formatLongDate(today)}
-      right={
-        <Pressable
-          onPress={onOpenCheckin}
-          className="flex-row items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2"
-        >
-          <Ionicons name="moon-outline" size={14} color="#34d399" />
-          <Text className="text-xs font-semibold text-emerald-300">Check-out</Text>
-        </Pressable>
-      }
-    >
-      {top}
-
+    <Screen title="Rutina" subtitle="Hábitos de apoyo: opcionales, sin presión">
       <View className="mb-4 flex-row gap-3">
         <Card className="flex-1">
           <Text className="text-[11px] font-medium text-slate-400">Momentum</Text>
@@ -69,7 +47,7 @@ export function TodayScreen({ onOpenCheckin, top, banner }: Props) {
           <ProgressBar value={summary.pct} />
         </Card>
         <Card className="flex-1">
-          <Text className="text-[11px] font-medium text-slate-400">Racha</Text>
+          <Text className="text-[11px] font-medium text-slate-400">Racha rutina</Text>
           <View className="my-1 flex-row items-center gap-1">
             <Text className="text-2xl font-extrabold text-amber-400">{streak}</Text>
             <Ionicons name="flame" size={20} color="#f59e0b" />
@@ -84,8 +62,6 @@ export function TodayScreen({ onOpenCheckin, top, banner }: Props) {
           <Text className="text-[10px] text-slate-500">tareas afuera</Text>
         </Card>
       </View>
-
-      {banner}
 
       <Card className="mb-4">
         <View className="mb-3 flex-row items-start justify-between">
